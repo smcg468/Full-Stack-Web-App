@@ -24,9 +24,11 @@ def show_all_episodes():
         page_start = (page_size * (page_num - 1))
 
         data_to_return = []
-        for episode in officeEpisodes.find().skip(page_start).limit(page_size):
-            episode["_id"] = str(episode["_id"])
-            data_to_return.append(episode)
+        for office_episode in officeEpisodes.find().skip(page_start).limit(page_size):
+            office_episode["_id"] = str(office_episode["_id"])
+            for review in office_episode["review"]:
+                review["_id"] = str(review["_id"])
+            data_to_return.append(office_episode)
 
         return make_response (jsonify( data_to_return), 200)
 
@@ -36,12 +38,14 @@ def show_one_episode(id):
 
     if ObjectId(id) == office_episode["_id"]:
         office_episode["_id"] = str(office_episode["_id"])
+        for review in office_episode["review"]:
+            review["_id"] = str(review["_id"])
         return make_response(jsonify(office_episode, 200))
     else:
         return make_response(jsonify({"Error" : "Invalid Episode ID"}), 404)
 
 
-@office_episodes.route("/api/v1.0/OfficeEpisodes/<string:id>/reviews", methods=["GET"])
+@office_episodes.route("/<string:id>/reviews", methods=["GET"])
 def show_episode_review(id):
     data_to_return = []
     office_episode = officeEpisodes.find_one({"_id": ObjectId(id)},
@@ -54,6 +58,9 @@ def show_episode_review(id):
 
 
     return make_response(jsonify(data_to_return), 201)
+
+
+
 
 
 

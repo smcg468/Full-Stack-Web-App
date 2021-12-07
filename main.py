@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from episodeReviews import episode_reviews
 from office_episodes import office_episodes, officeEpisodes
 from userAuthentication import usersAuth
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 main = Flask(__name__)
 CORS(main)
