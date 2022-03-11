@@ -11,14 +11,13 @@ usersAuth = Blueprint('usersAuth', __name__)
 client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.theOffice
 UsersDB = db.Users
-url = "http://localhost:"
-port = "5000"
 
 blacklist = db.blacklist
 
 @usersAuth.route("/login", methods=["GET"])
 def login():
     auth = request.authorization
+    print(auth)
     if auth:
         user = UsersDB.find_one({"username": auth["username"]})
         if user is not None:
@@ -44,12 +43,13 @@ def register():
             "email": request.form["email"],
             "username" : request.form["username"],
             "password" : bcrypt.hashpw(bytes(password, 'UTF-8'),bcrypt.gensalt()),
-            "access" : ["User"]
+            "access" : "User",
         }
 
         UsersDB.insert_one(newUser)
         return make_response( jsonify( { "New User Registered" : "Success"} ), 201)
     else:
+        print(request.form)
         return make_response( jsonify( {"Error" : "Missing Form Data"}), 404)
 
 
@@ -70,36 +70,5 @@ def logout():
     token = request.headers['x-access-token']
     blacklist.insert_one = ({'token': token})
     return make_response(jsonify({"Message":"Logout Successful"}), 200)
-
-def jwt_required(func):
-    @wraps(func)
-    def jwt_required_wrapper(*args, **kwargs):
-        token = None
-        if "x-access-token" in request.headers:
-            token = request.headers["x-access-token"]
-        if not token:
-            return jsonify({'Token Error Message': 'Token is Missing'}), 401
-        try:
-            data = jwt.decode(token, "PRIVATE_KEY")
-        except:
-            return jsonify({'Token Error Message': 'Token is Invalid'}), 401
-        bl_token = blacklist.find_one({"token" : token})
-        if bl_token is not None:
-            return make_response(jsonify({"Token Has been Cancelled"}), 401)
-
-        return func(*args, **kwargs)
-    return jwt_required_wrapper
-
-def admin_required(func):
-    @wraps(func)
-    def admin_required_wrapper(*args, **kwargs):
-        token = request.headers["x-access-token"]
-        data = jwt.decode(token, "PRIVATE_KEY")
-        if data["admin"]:
-            return func(*args, **kwargs)
-        else:
-            return make_response(jsonify({'Admin Error Message': 'Admin Access Required'}), 401)
-
-    return admin_required_wrapper
 
 

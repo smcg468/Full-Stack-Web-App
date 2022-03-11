@@ -7,8 +7,6 @@ from flask_cors import CORS, cross_origin
 
 main = Flask(__name__)
 CORS(main)
-url = "http://localhost:"
-port = "5000"
 
 
 main.config["SECRET_KEY"] = "SECRET_KEY"

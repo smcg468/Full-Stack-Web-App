@@ -9,25 +9,6 @@ episode_reviews = Blueprint("episode_reviews", __name__)
 client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.theOffice
 officeEpisodes = db.officeEpisodes
-url = 'http://localhost:'
-port = '5000'
-
-
-@episode_reviews.route("/", methods=["GET"])
-def show_all_reviews():
-    page_num, page_size = 1, 10
-    if request.args.get("pn"):
-        page_num = int(request.args.get('pn'))
-    if request.args.get("ps"):
-        page_size = int(request.args.get('ps'))
-    page_start = (page_size * (page_num - 1))
-
-    data_to_return = []
-    for review in officeEpisodes.find().skip(page_start).limit(page_size):
-        review["_id"] = str(review["_id"])
-        data_to_return.append(review)
-
-    return make_response(jsonify(data_to_return), 200)
 
 
 @episode_reviews.route("/<string:id>/", methods=["GET"])
@@ -71,16 +52,18 @@ def add_review(id):
         return make_response(jsonify({"Error": "Missing Form Data"}), 404)
 
 
-@episode_reviews.route("/<string:review_id>", methods=["PUT"])
+@episode_reviews.route("/<string:review_id>/", methods=["PUT"])
 def edit_review(review_id):
     if "rating" in request.form and "review" in request.form:
         edited_review = {
-                "review.$.username": request.form["username"],
                 "review.$.rating": request.form["rating"],
                 "review.$.review": request.form["review"]
                 }
     else:
         return make_response(jsonify({"Error": "Missing Form Data"}), 404)
+
+    # print(edited_review)
+    print(review_id)
 
     if ObjectId.is_valid(review_id):
         officeEpisodes.update_one(
@@ -91,12 +74,13 @@ def edit_review(review_id):
         edited_review_link = "http://localhost:5000/v1.0/episode_reviews/" + review_id
         return make_response(jsonify({"Edited Review URL": edited_review_link}), 200)
     else:
-        return make_response(jsonify({"Error": "Invalid Review ID"}), 404)
+        return make_response(jsonify({"Error": "Invalid Review ID"}), 40)
 
 
 @episode_reviews.route("/<string:review_id>/", methods=["DELETE"])
 def delete_review(review_id):
     if ObjectId.is_valid(review_id):
+        print(review_id)
 
         officeEpisodes.update_one({"review._id": ObjectId(review_id)},
                               {"$pull": {"review":{"_id": ObjectId(review_id)}}})

@@ -9,14 +9,12 @@ office_episodes = Blueprint("office_episodes", __name__)
 client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.theOffice
 officeEpisodes = db.officeEpisodes
-
-url = "http://localhost:"
-port = "5000"
+favouriteEpisodes = db.favouriteEpisodes
 
 
 @office_episodes.route("/", methods=["GET"])
 def show_all_episodes():
-        page_num, page_size = 1, 11
+        page_num, page_size = 1, 9
         if request.args.get("pn"):
             page_num = int(request.args.get('pn'))
         if request.args.get("ps"):
@@ -58,6 +56,28 @@ def show_episode_review(id):
 
 
     return make_response(jsonify(data_to_return), 201)
+
+
+@office_episodes.route("/season/", methods=["GET"])
+def show_season():
+
+    season = {}
+    page_num, page_size = 1, 30
+    if request.args.get("s"):
+        season = {"season": int(request.args.get("s"))}
+    season_start = (1)
+
+    data_to_return = []
+    for office_episode in officeEpisodes.find(season).skip(season_start).limit(page_size):
+        office_episode["_id"] = str(office_episode["_id"])
+        for review in office_episode["review"]:
+            review["_id"] = str(review["_id"])
+        data_to_return.append(office_episode)
+
+    return make_response(jsonify(data_to_return), 200)
+
+
+
 
 
 
