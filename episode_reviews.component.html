@@ -1,0 +1,53 @@
+<div *ngFor = "let review of webService.episodeReview_list | async;">
+    <div>
+        <div class="">
+            <div class="max-w-md py-4 px-8 bg-white shadow-lg rounded-lg my-20">
+                <div class="flex justify-center md:justify-end -mt-16">
+                  <img class="w-20 h-20 object-cover rounded-full border-2 border-red-500" src="https://images.unsplash.com/photo-1499714608240-22fc6ad53fb2?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80">
+                </div>
+                <div>
+                  <p class="mt-2 text-gray-600">{{review.rating}}/10</p>
+                  <p class="mt-2 text-gray-600">{{review.review}}</p>
+                </div>
+                <div class="flex justify-end mt-4">
+                  <a href="#" class="text-xl font-medium text-red-500">Created By - {{review.username}}</a>
+                </div>
+
+            <div *ngIf="authService.user$ | async as user">
+
+                
+                <form [formGroup]="updatedReview" (ngSubmit)="updatedSubmit(review._id)">
+
+                  <div>
+                      <label for="Rating">Rating</label>
+                      <select name="rating" id="rating" class="form-control w-full border border-gray-300
+                              rounded-lg shadow-sm" formControlName="rating" placeholder="10">
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="4">4</option>
+                          <option value="5">5</option>
+                          <option value="6">6</option>
+                          <option value="7">7</option>
+                          <option value="8">8</option>
+                          <option value="9">9</option>
+                          <option value="10">10</option>
+                      </select>
+                  </div>
+                  <div>
+                      <label for="review">Please Leave Your New Review Here</label>
+                      <textarea name="review" id="review" rows="1" class="form-control w-full border border-gray-300
+                              rounded-lg shadow-sm" formControlName="review"></textarea>
+                  </div>
+                  <button type="submit"
+                  [formGroup]="updatedReview"
+                      class='object-right-top bg-red-500 hover:bg-red-400 text-black font-bold py-2 px-4 border-b-4'>Update</button>
+              </form>
+            </div>
+            
+                  
+                  <button  *ngIf="authService.user$ | async as user" class='object-right-bottom bg-red-500 hover:bg-red-400 text-black font-bold py-2 px-4 border-b-4' (click)='DeleteReview(review)'>Delete</button>
+              </div>
+        </div>
+    </div>
+</div>
